@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Imprime tu libro · Printcolor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@800;900&family=Literata:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Tinta y taller */
+    --tinta:#1B1E22;
+    --tinta-suave:#535A61;
+    --linea:rgba(27,30,34,.18);
+    --mesa:#23262B;            /* la mesa de la imprenta, alrededor de la hoja */
+    --cian:#0083C1;            /* cian de cuatricromia: seleccion y foco */
+    --cian-tinte:rgba(0,131,193,.07);
+    --sello:#C42F5C;           /* sello de caucho: solo "Recomendado" */
+    /* La hoja: cambia segun el papel elegido (firma de la pagina) */
+    --papel:#FAF8F1;
+    --radio:3px;
+    --f-display:'Archivo',sans-serif;
+    --f-libro:'Literata',Georgia,serif;
+    --f-ficha:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--mesa);color:var(--tinta);
+    font-family:var(--f-libro);font-size:15.5px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---- La hoja sobre la mesa ---- */
+  .taller{max-width:720px;margin:0 auto;padding:34px 16px 150px;position:relative}
+  .rotulo-mesa{
+    font-family:var(--f-ficha);font-size:10.5px;letter-spacing:.22em;
+    color:rgba(255,255,255,.42);text-align:center;margin:0 0 14px;text-transform:uppercase;
+  }
+  .hoja{
+    position:relative;background:var(--papel);border-radius:2px;
+    padding:38px 34px 30px;box-shadow:0 18px 50px rgba(0,0,0,.42);
+    transition:background-color .45s ease;
+  }
+  /* Marcas de corte en las esquinas, fuera de la hoja */
+  .cm{position:absolute;width:14px;height:14px;pointer-events:none}
+  .cm::before,.cm::after{content:"";position:absolute;background:rgba(255,255,255,.45)}
+  .cm::before{width:14px;height:1px}
+  .cm::after{width:1px;height:14px}
+  .cm.tl{top:-20px;left:-20px}   .cm.tl::before{bottom:0}      .cm.tl::after{right:0}
+  .cm.tr{top:-20px;right:-20px}  .cm.tr::before{bottom:0}      .cm.tr::after{left:0}
+  .cm.bl{bottom:-20px;left:-20px}.cm.bl::before{top:0}         .cm.bl::after{right:0}
+  .cm.br{bottom:-20px;right:-20px}.cm.br::before{top:0}        .cm.br::after{left:0}
+
+  /* ---- Cabecera de la ficha ---- */
+  .logo{height:34px;width:auto;display:block;margin:0 0 18px}
+  .eyebrow{
+    font-family:var(--f-ficha);font-size:11px;font-weight:600;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--cian);margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--f-display);font-weight:900;font-size:clamp(30px,6vw,40px);
+    line-height:1.04;letter-spacing:-.015em;margin:0 0 10px;
+  }
+  .sub{font-style:italic;color:var(--tinta-suave);margin:0 0 8px;font-size:16px}
+  .cabecera{border-bottom:1.5px solid var(--tinta);padding-bottom:22px;margin-bottom:26px}
+
+  /* ---- Pasos de la ficha ---- */
+  .paso{margin:0 0 26px}
+  .paso .et{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}
+  .paso .et b{
+    font-family:var(--f-ficha);font-weight:700;font-size:12px;color:var(--cian);
+    letter-spacing:.08em;flex:0 0 auto;
+  }
+  .paso .et span{font-weight:600;font-size:17.5px;font-family:var(--f-libro)}
+  .hint{font-size:13px;color:var(--tinta-suave);margin:-4px 0 12px;font-style:italic}
+
+  .ops{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ops.papeles{grid-template-columns:1fr}
+
+  .op{
+    border:1.5px solid var(--linea);border-radius:var(--radio);padding:14px 12px;
+    cursor:pointer;background:rgba(255,255,255,.35);text-align:center;
+    transition:border-color .15s,background .15s,box-shadow .15s;
+  }
+  .op:hover{border-color:var(--tinta-suave)}
+  .op:focus-visible{outline:2.5px solid var(--cian);outline-offset:2px}
+  .op.sel{border-color:var(--cian);background:var(--cian-tinte);box-shadow:inset 0 0 0 1px var(--cian)}
+  .op .ic{height:30px;display:flex;align-items:center;justify-content:center;gap:4px}
+  .op .tx{font-size:14px;margin-top:8px;font-weight:600}
+  .op .nota{font-family:var(--f-ficha);font-size:10.5px;color:var(--tinta-suave);margin-top:3px;letter-spacing:.02em}
+
+  /* Iconos tipograficos / CMYK */
+  .punto{width:13px;height:13px;border-radius:50%;display:inline-block}
+  .punto.k{background:var(--tinta)}
+  .punto.hueco{border:1.5px solid var(--tinta)}
+  .punto.c{background:#00A3E0}.punto.m{background:#EC008C}
+  .punto.y{background:#F5D400}.punto.k2{background:#1A1A1A}
+  .cmyk .punto{margin:0 -3px}
+  .iva-num{font-family:var(--f-ficha);font-weight:700;font-size:19px;letter-spacing:-.02em}
+  .op svg{display:block}
+
+  /* Papeles (lista generada por JS) */
+  .op.papel{display:flex;align-items:flex-start;gap:11px;text-align:left;position:relative}
+  .op.papel .nom{font-weight:600;font-size:14.5px}
+  .op.papel .ds{display:block;font-size:12.5px;color:var(--tinta-suave);margin-top:1px}
+  .dot{
+    width:15px;height:15px;border-radius:2px;border:1.5px solid var(--tinta-suave);
+    flex:0 0 auto;margin-top:3px;position:relative;background:rgba(255,255,255,.5);
+  }
+  .op.papel.sel .dot{border-color:var(--cian);background:var(--cian)}
+  .op.papel.sel .dot::after{
+    content:"";position:absolute;inset:2px 3px 4px 3px;
+    border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-48deg) scale(.9);
+  }
+  .badge{
+    position:absolute;top:9px;right:10px;
+    font-family:var(--f-ficha);font-size:9.5px;font-weight:700;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--sello);border:1.5px solid var(--sello);
+    border-radius:2px;padding:2px 7px;transform:rotate(-2deg);background:transparent;
+  }
+
+  /* ---- Campos ---- */
+  .fila{display:flex;gap:14px}
+  .campo{flex:1}
+  label{
+    font-family:var(--f-ficha);font-size:10.5px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--tinta-suave);display:block;margin:0 0 5px;
+  }
+  input,select{
+    width:100%;font-size:15px;padding:11px 12px;border:1.5px solid var(--linea);
+    border-radius:var(--radio);background:rgba(255,255,255,.55);
+    font-family:var(--f-ficha);color:var(--tinta);
+  }
+  input:focus-visible,select:focus-visible{outline:2.5px solid var(--cian);outline-offset:1px;border-color:var(--cian)}
+  .aviso{
+    font-size:13px;color:var(--tinta-suave);border:1.5px dashed var(--linea);
+    border-radius:var(--radio);padding:10px 12px;margin-top:12px;font-style:italic;
+  }
+  .pie{
+    font-family:var(--f-ficha);font-size:10.5px;color:var(--tinta-suave);
+    text-align:center;margin:26px 0 0;letter-spacing:.04em;
+  }
+
+  /* ---- Resguardo inferior (barra de precio) ---- */
+  .barra{
+    position:fixed;left:0;right:0;bottom:0;background:var(--papel);
+    border-top:1.5px dashed var(--tinta-suave);
+    box-shadow:0 -8px 24px rgba(0,0,0,.28);
+    transition:background-color .45s ease;
+  }
+  .barra .in{
+    max-width:720px;margin:0 auto;padding:13px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .precio .lab{
+    font-family:var(--f-ficha);font-size:10px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-suave);
+  }
+  .precio .val{font-family:var(--f-ficha);font-size:25px;font-weight:700;letter-spacing:-.02em}
+  .precio .val small{font-size:12px;font-weight:400;color:var(--tinta-suave)}
+  .precio .pap{font-family:var(--f-ficha);font-size:10.5px;color:var(--tinta-suave);margin-top:2px}
+  .calc{
+    display:inline-block;width:13px;height:13px;border:2px solid var(--linea);
+    border-top-color:var(--cian);border-radius:50%;
+    animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px;
+  }
+  @keyframes sp{to{transform:rotate(360deg)}}
+  button.cta{
+    background:var(--tinta);color:#FDFDFB;border:0;border-radius:var(--radio);
+    padding:14px 22px;font-family:var(--f-display);font-weight:800;font-size:15px;
+    cursor:pointer;white-space:nowrap;letter-spacing:.01em;
+    transition:transform .12s,box-shadow .12s;
+  }
+  button.cta:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+  button.cta:focus-visible{outline:2.5px solid var(--cian);outline-offset:2px}
+  button.cta:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none}
+
+  @media (max-width:720px){
+    .taller{padding:18px 0 150px}
+    .rotulo-mesa{margin-bottom:10px}
+    .hoja{border-radius:0;padding:28px 18px 24px}
+    .cm{display:none}
+    .barra .in{padding:12px 14px}
+    .precio .val{font-size:21px}
+    button.cta{padding:13px 16px;font-size:14px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+<div class="taller">
+  <p class="rotulo-mesa">Printcolor · Taller de impresión</p>
+  <div class="hoja">
+    <i class="cm tl"></i><i class="cm tr"></i><i class="cm bl"></i><i class="cm br"></i>
+
+    <div class="cabecera">
+      <img class="logo" src="/logo_printcolor.png" alt="Printcolorweb.com — Imprime y publica tu libro">
+      <p class="eyebrow">Orden de presupuesto</p>
+      <h1>Imprime tu libro</h1>
+      <p class="sub">Cinco preguntas y te damos el precio real de imprenta, al momento.</p>
+    </div>
+
+    <div class="paso">
+      <div class="et"><b>01</b><span>¿De qué color es el interior?</span></div>
+      <div class="ops" id="g-tinta" role="radiogroup" aria-label="Color del interior">
+        <div class="op sel" data-g="tinta" data-v="bn" role="radio" aria-checked="true" tabindex="0">
+          <div class="ic"><span class="punto k"></span><span class="punto hueco"></span></div>
+          <div class="tx">Blanco y negro</div>
+        </div>
+        <div class="op" data-g="tinta" data-v="color" role="radio" aria-checked="false" tabindex="0">
+          <div class="ic cmyk"><span class="punto c"></span><span class="punto m"></span><span class="punto y"></span><span class="punto k2"></span></div>
+          <div class="tx">A color</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="et"><b>02</b><span>¿Qué encuadernación?</span></div>
+      <div class="ops" id="g-enc" role="radiogroup" aria-label="Encuadernación">
+        <div class="op sel" data-g="enc" data-v="blanda" role="radio" aria-checked="true" tabindex="0">
+          <div class="ic">
+            <svg width="30" height="26" viewBox="0 0 30 26" fill="none" aria-hidden="true">
+              <path d="M4 3 Q4 1.5 5.5 1.5 L24 1.5 Q26 1.5 26 3.5 L26 22.5 Q26 24.5 24 24.5 L5.5 24.5 Q4 24.5 4 23 Z" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M8 1.5 L8 24.5" stroke="currentColor" stroke-width="1.2" opacity=".45"/>
+            </svg>
+          </div>
+          <div class="tx">Tapa blanda</div><div class="nota">precio al instante</div>
+        </div>
+        <div class="op" data-g="enc" data-v="dura" role="radio" aria-checked="false" tabindex="0">
+          <div class="ic">
+            <svg width="30" height="26" viewBox="0 0 30 26" fill="none" aria-hidden="true">
+              <rect x="3" y="1.5" width="24" height="23" rx="1.4" stroke="currentColor" stroke-width="2.1"/>
+              <path d="M9 1.5 L9 24.5" stroke="currentColor" stroke-width="1.2" opacity=".45"/>
+            </svg>
+          </div>
+          <div class="tx">Tapa dura</div><div class="nota">te lo confirmamos</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paso">
+      <div class="et"><b>03</b><span>Papel del interior</span></div>
+      <p class="hint" id="papel-hint">Te marcamos el recomendado. La página que estás viendo se imprime en él: cámbialo y verás el tono del papel.</p>
+      <div class="ops papeles" id="g-papel" role="radiogroup" aria-label="Papel del interior"></div>
+    </div>
+
+    <div class="paso">
+      <div class="et"><b>04</b><span>Tamaño, páginas y ejemplares</span></div>
+      <div class="campo" style="margin-bottom:12px">
+        <label for="formato">Formato</label>
+        <select id="formato"><option>A5 (14.8x21 cm.)</option></select>
+      </div>
+      <div class="fila">
+        <div class="campo"><label for="paginas">Nº de páginas</label><input id="paginas" type="number" min="1" value="180"></div>
+        <div class="campo"><label for="ejemplares">Nº de ejemplares</label><input id="ejemplares" type="number" min="1" value="50"></div>
+      </div>
+      <div class="aviso" id="aviso-dura" hidden>La tapa dura se calcula a medida: te enviamos el precio cerrado por email antes de cobrar nada.</div>
+    </div>
+
+    <div class="paso" style="margin-bottom:6px">
+      <div class="et"><b>05</b><span>Impuestos (IVA)</span></div>
+      <p class="hint">Los libros sin publicidad tributan al tipo reducido del 4%.</p>
+      <div class="ops" id="g-pub" role="radiogroup" aria-label="IVA aplicable">
+        <div class="op sel" data-g="pub" data-v="no" role="radio" aria-checked="true" tabindex="0">
+          <div class="ic"><span class="iva-num">4%</span></div>
+          <div class="tx">Sin publicidad</div><div class="nota">tipo reducido</div>
+        </div>
+        <div class="op" data-g="pub" data-v="si" role="radio" aria-checked="false" tabindex="0">
+          <div class="ic"><span class="iva-num">21%</span></div>
+          <div class="tx">Lleva publicidad</div><div class="nota">tipo general</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="paso" id="paso-datos" hidden>
+      <div class="et"><b>06</b><span>Tus datos</span></div>
+      <p class="hint">Enviamos tu configuración tal cual a printcolorweb.com y recibirás el presupuesto en tu correo. Sin compromiso.</p>
+      <div class="campo" style="margin-bottom:12px">
+        <label for="dato-titulo">Título del libro *</label>
+        <input id="dato-titulo" type="text" maxlength="120" autocomplete="off">
+      </div>
+      <div class="fila" style="margin-bottom:12px">
+        <div class="campo"><label for="dato-nombre">Nombre *</label><input id="dato-nombre" type="text" autocomplete="given-name"></div>
+        <div class="campo"><label for="dato-apellidos">Apellidos</label><input id="dato-apellidos" type="text" autocomplete="family-name"></div>
+      </div>
+      <div class="fila" style="margin-bottom:14px">
+        <div class="campo"><label for="dato-email">Email *</label><input id="dato-email" type="email" autocomplete="email"></div>
+        <div class="campo"><label for="dato-telefono">Teléfono</label><input id="dato-telefono" type="tel" autocomplete="tel"></div>
+      </div>
+      <p class="hint" id="datos-error" style="color:#B3261E" hidden></p>
+      <button class="cta" id="btn-enviar" type="button" style="width:100%">Enviar presupuesto a mi correo</button>
+      <p class="hint" style="margin-top:10px;text-align:center">
+        ¿Prefieres comprar ya? <a href="https://www.printcolorweb.com/printcolor/imprimir-libro" target="_blank" rel="noopener">Hazlo en printcolorweb.com →</a>
+      </p>
+    </div>
+
+    <div class="paso" id="paso-enviado" hidden>
+      <div class="et"><b>✓</b><span>Presupuesto enviado</span></div>
+      <p class="hint" id="enviado-detalle">Revisa tu correo: Printcolor te enviará el presupuesto cerrado.</p>
+    </div>
+
+    <p class="pie">Por detrás se rellena el formulario completo de printcolorweb.com</p>
+  </div>
+</div>
+
+<div class="barra">
+  <div class="in">
+    <div class="precio">
+      <div class="lab" id="lab">Precio estimado</div>
+      <div class="val" id="val">—</div>
+      <div class="pap" id="pap"></div>
+    </div>
+    <button class="cta" id="cta">Continuar al pago →</button>
+  </div>
+</div>
+
+<script>
+const estado = {tinta:'bn', enc:'blanda', formato:'A5 (14.8x21 cm.)', papel:'5', pub:'no'};
+const $ = s => document.querySelector(s);
+let PAPELES = [], RECOMENDADO = {bn:'5', color:'1'}, papelTocado = false;
+
+// La hoja se "imprime" en el papel elegido: cada papel tiñe la pagina (firma del diseño)
+const TINTES = {
+  '1':'#F5F5F1',  // Estucado mate: blanco neutro, superficie sedosa
+  '2':'#FBFCFE',  // Estucado brillante: blanco frio, luminoso
+  '3':'#EFEBDC',  // 100% reciclado: crudo agrisado
+  '4':'#FAF8F1',  // Offset: blanco natural
+  '5':'#F7EFDC'   // Novela: ahuesado calido
+};
+function aplicarTinte(){
+  document.documentElement.style.setProperty('--papel', TINTES[estado.papel] || TINTES['4']);
+}
+
+// Cargar formatos y papeles reales de la web
+fetch('/api/opciones').then(r=>r.json()).then(d=>{
+  if(!d || !d.ok) return;
+  if(d.formatos && d.formatos.length){
+    const sel = $('#formato'); sel.innerHTML='';
+    d.formatos.forEach(f=>{ const o=document.createElement('option'); o.textContent=f; sel.appendChild(o); });
+    const pre = d.formatos.find(f=>/A5/.test(f)) || d.formatos[0];
+    sel.value = pre; estado.formato = pre;
+  }
+  if(d.papeles && d.papeles.length){
+    PAPELES = d.papeles; RECOMENDADO = d.recomendado || RECOMENDADO;
+    estado.papel = RECOMENDADO[estado.tinta];
+    pintarPapeles();
+  }
+  recalcular();
+}).catch(()=>{});
+
+function pintarPapeles(){
+  const rec = RECOMENDADO[estado.tinta];
+  const cont = $('#g-papel'); cont.innerHTML='';
+  PAPELES.forEach(p=>{
+    const sel = p.id===estado.papel;
+    const badge = p.id===rec ? '<span class="badge">Recomendado</span>' : '';
+    const div = document.createElement('div');
+    div.className = 'op papel'+(sel?' sel':''); div.dataset.papel = p.id;
+    div.setAttribute('role','radio');
+    div.setAttribute('aria-checked', sel?'true':'false');
+    div.setAttribute('tabindex','0');
+    div.innerHTML = '<span class="dot"></span><span><span class="nom">'+p.nombre+
+      ' · '+p.gramaje+'</span>'+badge+'<span class="ds">'+p.desc+'</span></span>';
+    div.addEventListener('click',()=>{
+      estado.papel = p.id; papelTocado = true; pintarPapeles(); aplicarTinte(); recalcular();
+    });
+    cont.appendChild(div);
+  });
+  aplicarTinte();
+}
+
+// Seleccion de tarjetas (tinta / encuadernacion / publicidad)
+document.querySelectorAll('.op[data-g]').forEach(o=>o.addEventListener('click',()=>{
+  const g=o.dataset.g;
+  document.querySelectorAll('.op[data-g="'+g+'"]').forEach(x=>{
+    x.classList.remove('sel'); x.setAttribute('aria-checked','false');
+  });
+  o.classList.add('sel'); o.setAttribute('aria-checked','true'); estado[g]=o.dataset.v;
+  $('#aviso-dura').hidden = (estado.enc!=='dura');
+  if(g==='tinta'){
+    // Al cambiar tinta, volvemos al papel recomendado (salvo que el cliente ya eligiera)
+    if(!papelTocado) estado.papel = RECOMENDADO[estado.tinta];
+    pintarPapeles();
+  }
+  recalcular();
+}));
+
+// Teclado: Enter o espacio activan cualquier tarjeta
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ') && e.target.classList && e.target.classList.contains('op')){
+    e.preventDefault(); e.target.click();
+  }
+});
+
+$('#formato').addEventListener('change',e=>{estado.formato=e.target.value; recalcular();});
+$('#paginas').addEventListener('input', debounce(recalcular,700));
+$('#ejemplares').addEventListener('input', debounce(recalcular,700));
+
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+function fmt(n){return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
+
+let pet=0, enVuelo=false, pendiente=false;
+function recalcular(){
+  // Tapa dura: el motor de precio en vivo aun no la cubre -> presupuesto manual
+  if(estado.enc==='dura'){
+    $('#lab').textContent='Tapa dura';
+    $('#val').innerHTML='<small>Precio a confirmar por email</small>';
+    $('#pap').textContent='';
+    $('#cta').textContent='Solicitar presupuesto →';
+    return;
+  }
+  // Evita peticiones solapadas: si hay una en curso, reenvia solo la ultima al acabar
+  if(enVuelo){ pendiente=true; return; }
+  enVuelo=true;
+  $('#cta').textContent='Continuar →';
+  $('#lab').textContent='Calculando precio real…';
+  $('#val').innerHTML='<span class="calc"></span><small>un momento</small>';
+  $('#pap').textContent='';
+  const mi=++pet;
+  fetch('/api/precio',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      tinta:estado.tinta, formato:estado.formato, papel:estado.papel,
+      publicidad: estado.pub==='si',
+      paginas:parseInt($('#paginas').value)||1,
+      ejemplares:parseInt($('#ejemplares').value)||1
+    })}).then(r=>r.json()).then(d=>{
+      if(mi!==pet) return; // llego una respuesta vieja
+      if(d && d.ok){
+        const t=d.detalle;
+        $('#lab').textContent='Precio total ('+t.ejemplares+' ejemplares)';
+        $('#val').innerHTML=fmt(d.precio)+' <small>IVA incl.</small>';
+        const marca = t.papel_recomendado ? ' · recomendado' : '';
+        $('#pap').innerHTML='Base '+fmt(t.base)+' + IVA '+t.iva_pct+'% ('+fmt(t.iva_importe)+')'
+          +'<br>'+t.papel+' '+t.gramaje+marca;
+      } else {
+        $('#lab').textContent='No se pudo calcular';
+        $('#val').innerHTML='<small>'+((d&&d.error)||'Inténtalo de nuevo')+'</small>';
+      }
+    }).catch(()=>{ if(mi===pet){$('#lab').textContent='Error de conexión';$('#val').textContent='—';} })
+      .finally(()=>{ enVuelo=false; if(pendiente){ pendiente=false; recalcular(); } });
+}
+
+$('#cta').addEventListener('click',()=>{
+  if(estado.enc==='dura'){
+    // Tapa dura: el motor aun no la cubre; se pide en la web real.
+    window.open('https://www.printcolorweb.com/printcolor/imprimir-libro','_blank');
+    return;
+  }
+  // Tapa blanda: continuar aqui mismo pidiendo los datos (paso 06)
+  const seccion = $('#paso-datos');
+  seccion.hidden = false;
+  seccion.scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(()=>$('#dato-titulo').focus({preventScroll:true}), 450);
+});
+
+$('#btn-enviar').addEventListener('click',()=>{
+  const titulo=$('#dato-titulo').value.trim();
+  const nombre=$('#dato-nombre').value.trim();
+  const email=$('#dato-email').value.trim();
+  const err=$('#datos-error');
+  err.hidden=true;
+  if(!titulo || !nombre || !email.includes('@')){
+    err.textContent='Revisa los campos marcados con *: título, nombre y un email válido.';
+    err.hidden=false;
+    return;
+  }
+  const btn=$('#btn-enviar');
+  btn.disabled=true;
+  btn.textContent='Enviando a printcolorweb.com… (medio minuto)';
+  fetch('/api/presupuesto',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      tinta:estado.tinta, formato:estado.formato, papel:estado.papel,
+      publicidad: estado.pub==='si',
+      paginas:parseInt($('#paginas').value)||1,
+      ejemplares:parseInt($('#ejemplares').value)||1,
+      titulo,
+      datos:{nombre, apellidos:$('#dato-apellidos').value.trim(),
+             email, telefono:$('#dato-telefono').value.trim()}
+    })}).then(r=>r.json()).then(d=>{
+      if(d && d.ok){
+        $('#paso-datos').hidden=true;
+        const fin=$('#paso-enviado');
+        fin.hidden=false;
+        const extra = d.precio_final ? ' Importe orientativo: '+d.precio_final+'.' : '';
+        $('#enviado-detalle').textContent =
+          'Hemos enviado tu solicitud a Printcolor con el título «'+titulo+'».'+extra+
+          ' Recibirás el presupuesto cerrado en '+email+'.';
+        fin.scrollIntoView({behavior:'smooth', block:'center'});
+      } else {
+        err.textContent=(d&&d.error)||'No se pudo enviar. Inténtalo de nuevo.';
+        err.hidden=false;
+      }
+    }).catch(()=>{
+      err.textContent='Error de conexión al enviar. Inténtalo de nuevo.';
+      err.hidden=false;
+    }).finally(()=>{
+      btn.disabled=false;
+      btn.textContent='Enviar presupuesto a mi correo';
+    });
+});
+
+// Tinte inicial (offset por defecto hasta que /api/opciones marque el recomendado)
+aplicarTinte();
+
+// El primer calculo lo dispara la carga de /api/opciones; si esa falla, este fallback:
+setTimeout(()=>{ if(pet===0) recalcular(); }, 2500);
+</script>
+</body>
+</html>
