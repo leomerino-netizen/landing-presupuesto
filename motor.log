@@ -1,0 +1,199 @@
+Arrancando navegador (Playwright)...
+Asistente listo en http://localhost:8765/
+Arrancando navegador (Playwright)...
+Asistente listo en http://localhost:8765/
+Arrancando navegador (Playwright)...
+Asistente listo en http://localhost:8765/
+Arrancando navegador (Playwright)...
+Asistente listo en http://localhost:8765/
+[motor] job 'opciones' iniciado
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64189)
+Traceback (most recent call last):
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 77, in do_GET
+    self._json(presupuesto.motor().opciones())
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 49, in _json
+    self.wfile.write(cuerpo)
+    ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 79, in do_GET
+    self._json({"ok": False, "error": str(e)}, 500)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 48, in _json
+    self.end_headers()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 598, in end_headers
+    self.flush_headers()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 602, in flush_headers
+    self.wfile.write(b"".join(self._headers_buffer))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
+----------------------------------------
+[motor] job 'opciones' terminado
+[motor] job 'opciones' iniciado
+[motor] job 'opciones' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 57413)
+Traceback (most recent call last):
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 110, in do_POST
+    self._json(res)
+    ~~~~~~~~~~^^^^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 49, in _json
+    self.wfile.write(cuerpo)
+    ~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 697, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 362, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 766, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 496, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 484, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 112, in do_POST
+    self._json({"ok": False, "error": str(e)}, 500)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\servidor.py", line 48, in _json
+    self.end_headers()
+    ~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 598, in end_headers
+    self.flush_headers()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\http\server.py", line 602, in flush_headers
+    self.wfile.write(b"".join(self._headers_buffer))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida por el software en su equipo host
+----------------------------------------
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'presupuesto' iniciado
+[motor] job 'presupuesto' terminado
+[zoho] carga próxima -> Débora 227 · Laura 243
+[zoho] lead nuevo 685090000050837022 asignado a Débora Tomás
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'presupuesto' iniciado
+[motor] job 'presupuesto' terminado
+[zoho] nota en Leads/685090000050837022 (owner Tomás)
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'precio' iniciado
+[motor] job 'precio' terminado
+[motor] job 'presupuesto' iniciado
+Traceback (most recent call last):
+  File "C:\Users\leome\Desktop\web-printcolor-IA\presupuesto.py", line 125, in _bucle
+    fut.put(self._enviar_presupuesto(page, opts))
+            ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "C:\Users\leome\Desktop\web-printcolor-IA\presupuesto.py", line 384, in _enviar_presupuesto
+    error_visible = page.evaluate(
+        """() => { const t=document.body.innerText.toLowerCase();
+             for(const p of ['obligatorio','error','no valido','no válido','incorrecto'])
+               if(t.includes(p)) return p;
+             return null; }""")
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\sync_api\_generated.py", line 8566, in evaluate
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.evaluate(expression=expression, arg=mapping.to_impl(arg))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_page.py", line 464, in evaluate
+    return await self._main_frame.evaluate(expression, arg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_frame.py", line 320, in evaluate
+    await self._channel.send(
+    ...<6 lines>...
+    )
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\leome\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\playwright\_impl\_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.Error: Page.evaluate: TypeError: Cannot read properties of null (reading 'innerText')
+    at eval (eval at evaluate (:290:30), <anonymous>:1:31)
+    at UtilityScript.evaluate (<anonymous>:297:18)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+[motor] job 'presupuesto' terminado
+[motor] job 'presupuesto' iniciado
+[motor] job 'presupuesto' terminado
+[zoho] nota en Leads/685090000050837022 (owner Tomás)

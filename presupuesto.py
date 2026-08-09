@@ -341,6 +341,12 @@ class MotorPrecio:
         if telefono:
             page.fill("input[name='TELEFONO']", telefono)
 
+        # El formulario exige marcar la casilla de consentimiento
+        # (PERMITEINFO); sin ella el envio se bloquea en silencio.
+        page.evaluate(
+            """() => { const c=document.querySelector("input[name='PERMITEINFO']");
+                 if(c && !c.checked) c.click(); }""")
+
         # Resumen que muestra la propia web (precio final, producto)
         resumen = page.evaluate(
             """() => { const t=document.body.innerText;
@@ -352,14 +358,29 @@ class MotorPrecio:
                     "url": page.url,
                     "nota": "Formulario relleno; NO se pulso ENVIAR (modo simulacion)."}
 
-        # Enviar de verdad
-        page.evaluate(
-            """() => { const a=[...document.querySelectorAll('a')]
-                 .find(x=>/^\\s*ENVIAR\\s*$/i.test(x.innerText||'') && x.offsetParent);
-               if(a) a.click(); }""")
-        page.wait_for_timeout(5000)
+        # Capturar alerts de validacion del formulario (antes se descartaban
+        # en silencio y el envio fallaba sin que nos enterasemos)
+        avisos = []
+        def _capturar_dialogo(dialog):
+            avisos.append(dialog.message)
+            dialog.dismiss()
+        page.on("dialog", _capturar_dialogo)
 
-        # Detectar error visible; si no hay, damos el envio por bueno
+        # Enviar de verdad
+        try:
+            page.evaluate(
+                """() => { const a=[...document.querySelectorAll('a')]
+                     .find(x=>/^\\s*ENVIAR\\s*$/i.test(x.innerText||'') && x.offsetParent);
+                   if(a) { a.click(); return true; } return false; }""")
+            page.wait_for_timeout(5000)
+        finally:
+            page.remove_listener("dialog", _capturar_dialogo)
+
+        if avisos:
+            return {"ok": False,
+                    "error": f"La web mostro un aviso al enviar: {avisos[0][:200]}"}
+
+        # Detectar error visible; ademas exigimos la confirmacion positiva
         error_visible = page.evaluate(
             """() => { const t=document.body.innerText.toLowerCase();
                  for(const p of ['obligatorio','error','no valido','no válido','incorrecto'])
@@ -368,6 +389,12 @@ class MotorPrecio:
         if error_visible:
             return {"ok": False,
                     "error": f"La web mostro un aviso ('{error_visible}') al enviar."}
+
+        confirmado = page.evaluate(
+            """() => /recibir[aá] su presupuesto por email/i.test(document.body.innerText)""")
+        if not confirmado:
+            return {"ok": False,
+                    "error": "La web no mostro la confirmacion de envio del presupuesto."}
         return {"ok": True, "precio_final": resumen,
                 "mensaje": "Presupuesto enviado. Printcolor te lo mandara por email."}
 

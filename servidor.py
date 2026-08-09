@@ -19,9 +19,24 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import presupuesto
+import zoho
+
+import os
 
 BASE = Path(__file__).resolve().parent
-PUERTO = 8765
+PUERTO = int(os.environ.get("PC_PUERTO", "8765"))
+
+# Archivos estáticos servidos (ruta -> (fichero local, content-type))
+ESTATICOS = {
+    "/logo_printcolor.png": ("logo_printcolor.png", "image/png"),
+    "/asesora_laura.jpg": ("asesora_laura.jpg", "image/jpeg"),
+    "/asesora_debora.jpg": ("asesora_debora.jpg", "image/jpeg"),
+    "/asesor_juan.jpg": ("asesor_juan.jpg", "image/jpeg"),
+    "/favicon-32.png": ("favicon-32.png", "image/png"),
+    "/favicon-512.png": ("favicon-512.png", "image/png"),
+    "/favicon.ico": ("favicon-32.png", "image/png"),
+    "/apple-touch-icon.png": ("apple-touch-icon.png", "image/png"),
+}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -33,18 +48,26 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(cuerpo)
 
+    def _html(self, fichero):
+        html = (BASE / fichero).read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(html)))
+        self.end_headers()
+        self.wfile.write(html)
+
     def do_GET(self):
-        if self.path in ("/", "/index.html"):
-            html = (BASE / "index.html").read_bytes()
+        if self.path in ("/", "/index.html", "/landing", "/landing.html"):
+            # La landing de captación (AdWords) es ahora la portada.
+            self._html("landing.html")
+        elif self.path in ("/asistente", "/asistente.html"):
+            # El asistente completo original queda disponible aquí.
+            self._html("index.html")
+        elif self.path in ESTATICOS and (BASE / ESTATICOS[self.path][0]).exists():
+            fichero, mime = ESTATICOS[self.path]
+            img = (BASE / fichero).read_bytes()
             self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(html)))
-            self.end_headers()
-            self.wfile.write(html)
-        elif self.path == "/logo_printcolor.png" and (BASE / "logo_printcolor.png").exists():
-            img = (BASE / "logo_printcolor.png").read_bytes()
-            self.send_response(200)
-            self.send_header("Content-Type", "image/png")
+            self.send_header("Content-Type", mime)
             self.send_header("Content-Length", str(len(img)))
             self.send_header("Cache-Control", "max-age=86400")
             self.end_headers()
@@ -66,6 +89,22 @@ class Handler(BaseHTTPRequestHandler):
             opts = json.loads(self.rfile.read(n) or b"{}")
             if self.path == "/api/presupuesto":
                 res = presupuesto.motor().enviar_presupuesto(opts)
+                # Presupuesto REAL enviado -> lead en Zoho CRM (en segundo plano,
+                # con dedupe y reparto Débora/Laura por carga; ver zoho.py)
+                if res.get("ok") and not res.get("simulado"):
+                    papel = presupuesto.PAPELES.get(str(opts.get("papel") or ""), {})
+                    detalle = {
+                        "tinta": "Blanco y negro" if opts.get("tinta", "bn") == "bn" else "Color",
+                        "formato": opts.get("formato"),
+                        "paginas": opts.get("paginas"),
+                        "ejemplares": opts.get("ejemplares"),
+                        "papel": papel.get("nombre"),
+                        "gramaje": papel.get("gtxt"),
+                        "iva_pct": 21 if opts.get("publicidad") else 4,
+                    }
+                    datos = dict(opts.get("datos") or {})
+                    datos["titulo"] = opts.get("titulo")
+                    zoho.sincronizar_en_segundo_plano(datos, detalle, res.get("precio_final"))
             else:
                 res = presupuesto.motor().calcular(opts)
             self._json(res)
